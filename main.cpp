@@ -2,6 +2,7 @@
 #include "InputReader.h"
 #include "Point.h"
 #include "Lift.h"
+#include "BinaryHeap.h"
 
 using namespace std;
 
@@ -26,5 +27,4 @@ int main(int argc, char const *argv[])
     if (lifts) {
         delete[] lifts;
     }
-    return 0;
 }
