@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Point.h"
 #include "Lift.h"
 
@@ -8,8 +9,8 @@ using namespace std;
 
 class InputReader {
 public:
-    int readInt();
-    void readStart(int* W, int* H, Point* start, Point* end, int* L);
-    void readGrid(int* grid, int W, int H);
-    void readLifts(Lift* lifts, int L);
+    static int read();
+    static void readStart(int* W, int* H, Point* start, Point* end, int* L);
+    static void readGrid(int* grid, int W, int H);
+    static void readLifts(Lift* lifts, int L);
 };

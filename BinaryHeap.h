@@ -16,5 +16,5 @@ public:
     ~BinaryHeap();
     void push(Point index, int cost);
     HeapNode pop();
-    bool empty();
+    bool empty() const;
 };

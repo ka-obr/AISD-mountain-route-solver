@@ -1,9 +1,11 @@
+//Inspired by https://www.geeksforgeeks.org/binary-heap/
+
 #include "Point.h"
 #include "BinaryHeap.h"
 #include <utility>
 #include <stdexcept>
 
-BinaryHeap::BinaryHeap(int maxSize) {
+BinaryHeap::BinaryHeap(int maxSize) : maxSize(maxSize) {
     heapArray = new HeapNode[maxSize];
     heapSize = 0;
 }
@@ -12,7 +14,7 @@ BinaryHeap::~BinaryHeap() {
     delete[] heapArray;
 }
 
-bool BinaryHeap::empty() {
+bool BinaryHeap::empty() const {
     return heapSize == 0;
 }
 
@@ -23,7 +25,7 @@ void BinaryHeap::push(Point index, int cost) {
     while( i > 0 && heapArray[(i - 1)/2].cost > heapArray[i].cost) {
         std::swap(heapArray[(i - 1)/2], heapArray[i]);
         i = (i - 1)/2;
-    } 
+    }
 }
 
 HeapNode BinaryHeap::pop() {
