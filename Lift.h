@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Point.h"
-#include <cstdio>
 
 class Lift {
 public:
@@ -9,4 +8,5 @@ public:
     Point end;
     int travelTime;
     int departureTime;
+    Lift* nextLift;
 };

@@ -12,7 +12,7 @@ class BinaryHeap {
     int heapSize;
     int maxSize;
 public:
-    BinaryHeap(int maxSize);
+    explicit BinaryHeap(int maxSize);
     ~BinaryHeap();
     void push(Point index, int cost);
     HeapNode pop();

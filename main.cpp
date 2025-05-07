@@ -1,13 +1,14 @@
 #include <iostream>
-#include <climits>
 #include "InputReader.h"
 #include "Point.h"
 #include "Lift.h"
 #include "BinaryHeap.h"
 
+#define INFINITY_COST 2147483647 //maximum integer
+
 using namespace std;
 
-//Formula to get in 1D array point (x,y) index = y * W + x
+//Formula to get in 1D array point (x,y)     index = y * W + x
 
 int index_formula(int x, int y, int W) {
     return y * W + x;
@@ -15,7 +16,7 @@ int index_formula(int x, int y, int W) {
 
 void initialize_start(int* distance, bool* visited, BinaryHeap& heap, Point start, int W, int H) {
     for (int i = 0; i < W * H; i++) {
-        distance[i] = INT_MAX;
+        distance[i] = INFINITY_COST;
         visited[i] = false;
     }
 
@@ -24,6 +25,7 @@ void initialize_start(int* distance, bool* visited, BinaryHeap& heap, Point star
 }
 
 void check_neighbors(HeapNode root, int* grid, int* distance, BinaryHeap& heap, int W, int H) {
+    // up   right   down    left
     int dx[] = {0, 1, 0, -1};
     int dy[] = {1, 0, -1, 0};
 
@@ -31,40 +33,44 @@ void check_neighbors(HeapNode root, int* grid, int* distance, BinaryHeap& heap, 
     int index = index_formula(cords.x, cords.y, W);
 
     for(int i = 0; i < 4; i++) {
-        int newX = cords.x + dx[i];
-        int newY = cords.y + dy[i];
-        if(newX >= 0 && newX < W && newY >=0 && newY < H) {
-            int newIndex = index_formula(newX, newY, W);
+        int neighborX = cords.x + dx[i];
+        int neighborY = cords.y + dy[i];
+        if(neighborX >= 0 && neighborX < W && neighborY >=0 && neighborY < H) {
+            int newIndex = index_formula(neighborX, neighborY, W);
             int cost = grid[newIndex] > grid[index] ? grid[newIndex] - grid[index] + 1 : 1;
             int newCost = root.cost + cost;
             if(newCost < distance[newIndex]) {
                 distance[newIndex] = newCost;
-                heap.push({newX, newY}, newCost);
+                heap.push({neighborX, neighborY}, newCost);
             }
         }
     }
 }
 
-void check_lifts(Lift* lifts, HeapNode root, BinaryHeap& heap, int* distance, int W, int L) {
+void check_lifts(Lift** liftsMap, HeapNode root, BinaryHeap& heap, int* distance, int W) {
     Point cords = root.index;
+    int liftIndex = index_formula(cords.x, cords.y, W);
 
-    for (int i = 0; i < L; i++) {
-        if (lifts[i].start == cords) {
+    if(liftsMap[liftIndex] != nullptr) {
+        Lift* currentLift = liftsMap[liftIndex];
+        while(currentLift != nullptr) {
+            int liftEndIndex = index_formula(currentLift->end.x, currentLift->end.y, W);
+
             //checking our actual time is multiple of time for starting lift
-            int wait = root.cost % lifts[i].departureTime == 0 ? 0 : lifts[i].departureTime - (root.cost % lifts[i].departureTime);
+            int wait = root.cost % currentLift->departureTime == 0 ? 0 : currentLift->departureTime - (root.cost % currentLift->departureTime);
 
-            int cost = wait + lifts[i].travelTime;
+            int cost = wait + currentLift->travelTime;
             int liftCost = root.cost + cost;
-            int liftEndIndex = index_formula(lifts[i].end.x, lifts[i].end.y, W);
             if (liftCost < distance[liftEndIndex]) {
                 distance[liftEndIndex] = liftCost;
-                heap.push(lifts[i].end, liftCost);
+                heap.push(currentLift->end, liftCost);
             }
+            currentLift = currentLift->nextLift;
         }
     }
 }
 
-int findShortestPath(int* grid, int W, int H, Point start, Point end, Lift* lifts, int L)
+int findShortestPath(int* grid, int W, int H, Point start, Point end, Lift** liftsMap, int L)
 {
     BinaryHeap heap(W * H);
     int* distance = new int[W * H];
@@ -92,7 +98,8 @@ int findShortestPath(int* grid, int W, int H, Point start, Point end, Lift* lift
         visited[index] = true;
 
         check_neighbors(root, grid, distance, heap, W, H);
-        check_lifts(lifts, root, heap, distance, W, L);
+        if(L > 0) 
+            check_lifts(liftsMap, root, heap, distance, W);
     }
 
     delete[] distance;
@@ -105,22 +112,22 @@ int main()
     InputReader input;
     Point start;
     Point end;
+    Lift** liftsMap = nullptr;
     int W, H, L;
     input.readStart(&W, &H, &start, &end, &L);
 
-    Lift* lifts = nullptr;
     if (L > 0) {
-        lifts = new Lift[L];
-        input.readLifts(lifts, L);
+        liftsMap = new Lift*[W * H];
+        input.readLifts(liftsMap, L, W, H);
     }
 
     int* grid = new int[W * H];
     input.readGrid(grid, W, H);
 
-    cout << findShortestPath(grid, W, H, start, end, lifts, L);
+    cout << findShortestPath(grid, W, H, start, end, liftsMap, L);
 
     delete[] grid;
-    if (lifts) {
-        delete[] lifts;
+    if (liftsMap) {
+        delete[] liftsMap;
     }
 }
