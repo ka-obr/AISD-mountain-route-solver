@@ -15,6 +15,7 @@ public:
     explicit BinaryHeap(int maxSize);
     ~BinaryHeap();
     void push(Point index, int cost);
+    static void swap(HeapNode& node1, HeapNode& node2);
     HeapNode pop();
     bool empty() const;
 };

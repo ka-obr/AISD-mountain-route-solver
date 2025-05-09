@@ -3,16 +3,11 @@
 #include "Point.h"
 #include "Lift.h"
 #include "BinaryHeap.h"
+#include "IndexFormula.h"
 
 #define INFINITY_COST 2147483647 //maximum integer
 
 using namespace std;
-
-//Formula to get in 1D array point (x,y)     index = y * W + x
-
-int index_formula(int x, int y, int W) {
-    return y * W + x;
-}
 
 void initialize_start(int* distance, bool* visited, BinaryHeap& heap, Point start, int W, int H) {
     for (int i = 0; i < W * H; i++) {
@@ -26,8 +21,8 @@ void initialize_start(int* distance, bool* visited, BinaryHeap& heap, Point star
 
 void check_neighbors(HeapNode root, int* grid, int* distance, BinaryHeap& heap, int W, int H) {
     // up   right   down    left
-    int dx[] = {0, 1, 0, -1};
-    int dy[] = {1, 0, -1, 0};
+    int dx[4] = {0, 1, 0, -1};
+    int dy[4] = {1, 0, -1, 0};
 
     Point cords = root.index;
     int index = index_formula(cords.x, cords.y, W);
@@ -35,13 +30,13 @@ void check_neighbors(HeapNode root, int* grid, int* distance, BinaryHeap& heap, 
     for(int i = 0; i < 4; i++) {
         int neighborX = cords.x + dx[i];
         int neighborY = cords.y + dy[i];
-        if(neighborX >= 0 && neighborX < W && neighborY >=0 && neighborY < H) {
-            int newIndex = index_formula(neighborX, neighborY, W);
-            int cost = grid[newIndex] > grid[index] ? grid[newIndex] - grid[index] + 1 : 1;
-            int newCost = root.cost + cost;
-            if(newCost < distance[newIndex]) {
-                distance[newIndex] = newCost;
-                heap.push({neighborX, neighborY}, newCost);
+        if(neighborX >= 0 && neighborX < W && neighborY >= 0 && neighborY < H) {
+            int neighborIndex = index_formula(neighborX, neighborY, W);
+            int cost = grid[neighborIndex] > grid[index] ? grid[neighborIndex] - grid[index] + 1 : 1;
+            int neighborCost = root.cost + cost;
+            if(neighborCost < distance[neighborIndex]) {
+                distance[neighborIndex] = neighborCost;
+                heap.push({neighborX, neighborY}, neighborCost);
             }
         }
     }
@@ -81,6 +76,7 @@ int findShortestPath(int* grid, int W, int H, Point start, Point end, Lift** lif
     while(!heap.empty()) {
         HeapNode root = heap.pop();
         Point cords = root.index;
+        int index;
 
         //checking have we reached the final point
         if(cords == end) {
@@ -89,11 +85,10 @@ int findShortestPath(int* grid, int W, int H, Point start, Point end, Lift** lif
             return root.cost;
         }
 
-        int index = index_formula(cords.x, cords.y, W);
+        index = index_formula(cords.x, cords.y, W);
 
-        if(visited[index]) {
+        if(visited[index])
             continue;
-        }
 
         visited[index] = true;
 
@@ -107,27 +102,33 @@ int findShortestPath(int* grid, int W, int H, Point start, Point end, Lift** lif
     return 0;
 }
 
+void initializeInput(int* W, int* H, Point* start, Point* end, int* L, Lift**& liftsMap, int*& grid) {
+    InputReader input;
+
+    input.readStart(W, H, start, end, L);
+
+    if (*L > 0) {
+        liftsMap = new Lift*[(*W) * (*H)];
+        input.readLifts(liftsMap, *L, *W, *H);
+    }
+
+    grid = new int[(*W) * (*H)];
+    input.readGrid(grid, *W, *H);
+}
+
 int main()
 {
-    InputReader input;
     Point start;
     Point end;
     Lift** liftsMap = nullptr;
+    int* grid = nullptr;
     int W, H, L;
-    input.readStart(&W, &H, &start, &end, &L);
 
-    if (L > 0) {
-        liftsMap = new Lift*[W * H];
-        input.readLifts(liftsMap, L, W, H);
-    }
-
-    int* grid = new int[W * H];
-    input.readGrid(grid, W, H);
+    initializeInput(&W, &H, &start, &end, &L, liftsMap, grid);
 
     cout << findShortestPath(grid, W, H, start, end, liftsMap, L);
 
     delete[] grid;
-    if (liftsMap) {
+    if (liftsMap)
         delete[] liftsMap;
-    }
 }

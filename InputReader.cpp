@@ -1,4 +1,5 @@
 #include "InputReader.h"
+#include "IndexFormula.h"
 
 int InputReader::read() {
     int x;
@@ -39,7 +40,7 @@ void InputReader::readLifts(Lift** liftsMap, int L, int W, int H) {
         storeLifts[i].departureTime = read();
         storeLifts[i].nextLift = nullptr;
 
-        int liftIndex = storeLifts[i].start.y * W +  storeLifts[i].start.x;
+        int liftIndex = index_formula(storeLifts[i].start.x, storeLifts[i].start.y, W);
 
         if(liftsMap[liftIndex] == nullptr) {
             liftsMap[liftIndex] = &storeLifts[i];
