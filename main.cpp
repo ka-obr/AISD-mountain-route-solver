@@ -19,6 +19,13 @@ void initialize_start(int* distance, bool* visited, BinaryHeap& heap, Point star
     distance[start.y * W + start.x] = 0;
 }
 
+void update_cost(int newCost, int newIndex, int* distance, BinaryHeap& heap, Point newPoint) {
+    if (newCost < distance[newIndex]) {
+        distance[newIndex] = newCost;
+        heap.push(newPoint, newCost);
+    }
+}
+
 void check_neighbors(HeapNode root, int* grid, int* distance, BinaryHeap& heap, int W, int H) {
     // up   right   down    left
     int dx[4] = {0, 1, 0, -1};
@@ -34,10 +41,7 @@ void check_neighbors(HeapNode root, int* grid, int* distance, BinaryHeap& heap, 
             int neighborIndex = index_formula(neighborX, neighborY, W);
             int cost = grid[neighborIndex] > grid[index] ? grid[neighborIndex] - grid[index] + 1 : 1;
             int neighborCost = root.cost + cost;
-            if(neighborCost < distance[neighborIndex]) {
-                distance[neighborIndex] = neighborCost;
-                heap.push({neighborX, neighborY}, neighborCost);
-            }
+            update_cost(neighborCost, neighborIndex, distance, heap, {neighborX, neighborY});
         }
     }
 }
@@ -56,10 +60,7 @@ void check_lifts(Lift** liftsMap, HeapNode root, BinaryHeap& heap, int* distance
 
             int cost = wait + currentLift->travelTime;
             int liftCost = root.cost + cost;
-            if (liftCost < distance[liftEndIndex]) {
-                distance[liftEndIndex] = liftCost;
-                heap.push(currentLift->end, liftCost);
-            }
+            update_cost(liftCost, liftEndIndex, distance, heap, currentLift->end);
             currentLift = currentLift->nextLift;
         }
     }
