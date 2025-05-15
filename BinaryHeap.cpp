@@ -23,13 +23,25 @@ void BinaryHeap::swap(HeapNode& node1, HeapNode& node2) {
     node2 = tempNode;
 }
 
+int BinaryHeap::leftChild(int i) {
+    return 2 * i + 1;
+}
+
+int BinaryHeap::rightChild(int i) {
+    return 2 * i + 2;
+}
+
+int BinaryHeap::parent(int i) {
+    return (i - 1)/2;
+}
+
 void BinaryHeap::push(Point index, int cost) {
     heapSize++;
     heapArray[heapSize - 1] = {index, cost};
     int i = heapSize - 1;
-    while(i > 0 && heapArray[(i - 1)/2].cost > heapArray[i].cost) {
-        swap(heapArray[(i - 1)/2], heapArray[i]);
-        i = (i - 1)/2;
+    while(i > 0 && heapArray[parent(i)].cost > heapArray[i].cost) {
+        swap(heapArray[parent(i)], heapArray[i]);
+        i = parent(i);
     }
 }
 
@@ -39,8 +51,10 @@ HeapNode BinaryHeap::pop() {
         heapSize--;
         heapArray[0] = heapArray[heapSize];
         int i = 0;
-        while(2 * i + 1 < heapSize) {
-            int child = 2 * i + 1;
+        while(leftChild(i) < heapSize) {
+            int child = leftChild(i);
+
+            //right child is better for lower cost
             if(child + 1 < heapSize && heapArray[child].cost > heapArray[child + 1].cost)
                 child++;
             if(heapArray[i].cost <= heapArray[child].cost)

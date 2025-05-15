@@ -9,7 +9,7 @@
 
 using namespace std;
 
-void initialize_start(int* distance, bool* visited, BinaryHeap& heap, Point start, int W, int H) {
+void initializeStart(int* distance, bool* visited, BinaryHeap& heap, Point start, int W, int H) {
     for (int i = 0; i < W * H; i++) {
         distance[i] = INFINITY_COST;
         visited[i] = false;
@@ -19,48 +19,47 @@ void initialize_start(int* distance, bool* visited, BinaryHeap& heap, Point star
     distance[start.y * W + start.x] = 0;
 }
 
-void update_cost(int newCost, int newIndex, int* distance, BinaryHeap& heap, Point newPoint) {
+void updateCost(int newCost, int newIndex, int* distance, BinaryHeap& heap, Point newPoint) {
     if (newCost < distance[newIndex]) {
         distance[newIndex] = newCost;
         heap.push(newPoint, newCost);
     }
 }
 
-void check_neighbors(HeapNode root, int* grid, int* distance, BinaryHeap& heap, int W, int H) {
+void checkNeighbors(HeapNode root, int* grid, int* distance, BinaryHeap& heap, int W, int H) {
     // up   right   down    left
     int dx[4] = {0, 1, 0, -1};
     int dy[4] = {1, 0, -1, 0};
 
     Point cords = root.index;
-    int index = index_formula(cords.x, cords.y, W);
+    int index = indexFormula(cords.x, cords.y, W);
 
     for(int i = 0; i < 4; i++) {
         int neighborX = cords.x + dx[i];
         int neighborY = cords.y + dy[i];
         if(neighborX >= 0 && neighborX < W && neighborY >= 0 && neighborY < H) {
-            int neighborIndex = index_formula(neighborX, neighborY, W);
+            int neighborIndex = indexFormula(neighborX, neighborY, W);
             int cost = grid[neighborIndex] > grid[index] ? grid[neighborIndex] - grid[index] + 1 : 1;
             int neighborCost = root.cost + cost;
-            update_cost(neighborCost, neighborIndex, distance, heap, {neighborX, neighborY});
+            updateCost(neighborCost, neighborIndex, distance, heap, {neighborX, neighborY});
         }
     }
 }
 
-void check_lifts(Lift** liftsMap, HeapNode root, BinaryHeap& heap, int* distance, int W) {
+void checkLifts(Lift** liftsMap, HeapNode root, BinaryHeap& heap, int* distance, int W) {
     Point cords = root.index;
-    int liftIndex = index_formula(cords.x, cords.y, W);
+    int liftIndex = indexFormula(cords.x, cords.y, W);
 
     if(liftsMap[liftIndex] != nullptr) {
         Lift* currentLift = liftsMap[liftIndex];
         while(currentLift != nullptr) {
-            int liftEndIndex = index_formula(currentLift->end.x, currentLift->end.y, W);
+            int liftEndIndex = indexFormula(currentLift->end.x, currentLift->end.y, W);
 
             //checking our actual time is multiple of time for starting lift
             int wait = root.cost % currentLift->departureTime == 0 ? 0 : currentLift->departureTime - (root.cost % currentLift->departureTime);
-
             int cost = wait + currentLift->travelTime;
             int liftCost = root.cost + cost;
-            update_cost(liftCost, liftEndIndex, distance, heap, currentLift->end);
+            updateCost(liftCost, liftEndIndex, distance, heap, currentLift->end);
             currentLift = currentLift->nextLift;
         }
     }
@@ -72,7 +71,7 @@ int findShortestPath(int* grid, int W, int H, Point start, Point end, Lift** lif
     int* distance = new int[W * H];
     bool* visited = new bool[W * H];
 
-    initialize_start(distance, visited, heap, start, W, H);
+    initializeStart(distance, visited, heap, start, W, H);
 
     while(!heap.empty()) {
         HeapNode root = heap.pop();
@@ -86,16 +85,16 @@ int findShortestPath(int* grid, int W, int H, Point start, Point end, Lift** lif
             return root.cost;
         }
 
-        index = index_formula(cords.x, cords.y, W);
+        index = indexFormula(cords.x, cords.y, W);
 
         if(visited[index])
             continue;
 
         visited[index] = true;
 
-        check_neighbors(root, grid, distance, heap, W, H);
+        checkNeighbors(root, grid, distance, heap, W, H);
         if(L > 0) 
-            check_lifts(liftsMap, root, heap, distance, W);
+            checkLifts(liftsMap, root, heap, distance, W);
     }
 
     delete[] distance;

@@ -3,7 +3,7 @@
 #include "Point.h"
 #include "Lift.h"
 
-#include <cstdio>
+#include <stdio.h>
 
 using namespace std;
 

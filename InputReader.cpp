@@ -40,7 +40,7 @@ void InputReader::readLifts(Lift** liftsMap, int L, int W, int H) {
         storeLifts[i].departureTime = read();
         storeLifts[i].nextLift = nullptr;
 
-        int liftIndex = index_formula(storeLifts[i].start.x, storeLifts[i].start.y, W);
+        int liftIndex = indexFormula(storeLifts[i].start.x, storeLifts[i].start.y, W);
 
         if(liftsMap[liftIndex] == nullptr) {
             liftsMap[liftIndex] = &storeLifts[i];
